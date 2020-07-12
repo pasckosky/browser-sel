@@ -11,8 +11,7 @@ import glob
 import sys, os
 
 __version__ = "0.1"
-__GITHUB_HOST__ = "https://raw.githubusercontent.com/pasckosky/tools/master/browser-sel"
-
+__GITHUB_HOST__ = "https://raw.githubusercontent.com/pasckosky/browser-sel/master/"
 def request_http():
     try:
         #raise Exception, "test"
@@ -72,7 +71,7 @@ def download_last(ref_version, dest_fname, update):
     if lastest_version == "":
         print("Errors while checking lastest version")
         sys.exit(1)
-    ver_url = "%s/dist/dug_%s.py" % (__GITHUB_HOST__, lastest_version)
+    ver_url = "%s/dist/browser-sel-%s.py" % (__GITHUB_HOST__, lastest_version)
     script_file = fn_get(ver_url)
     if script_file == "":
         print("Errors while getting lastest version")
