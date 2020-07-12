@@ -10,7 +10,83 @@ import glob
 
 import sys, os
 
-__VERSION__ = ["0.1"]
+__version__ = "0.1"
+__GITHUB_HOST__ = "https://raw.githubusercontent.com/pasckosky/tools/master/browser-sel"
+
+def request_http():
+    try:
+        #raise Exception, "test"
+        import requests
+        advanced = True
+    except:
+        import urllib.request
+        import urllib.error
+        import urllib.parse
+        advanced = False
+
+    def request_page_advanced(url):
+        r = requests.get(url)
+        if r.status_code == 200:
+            page = r.text
+            r.close()
+            return page
+        else:
+            print("Error %d on HTTP request" % r.status_code)
+            r.close()
+            return ""
+
+    def request_page_old(url):
+        print("Old request of %s" % url)
+        f = urllib.request.urlopen(url)
+        try:
+            page = f.read()
+        except:
+            print("Error on HTTP request")
+            page = ""
+        f.close()
+        return page
+
+    return request_page_advanced if advanced else request_page_old
+
+def check_version(ref_version):
+    fn_get = request_http()
+    lastest_url = "%s/dist/lastest"%__GITHUB_HOST__
+    lastest_version = fn_get(lastest_url).strip()
+    print("Lastes version is %s" % lastest_version)
+    print("You have version %s" % ref_version)
+    sys.exit(0)
+
+
+def download_last(ref_version, dest_fname, update):
+    fn_get = request_http()
+    lastest_url = "%s/dist/lastest"%__GITHUB_HOST__
+    lastest_version = fn_get(lastest_url).strip()
+
+    if update and lastest_version == ref_version:
+        print("You already have the last version")
+        sys.exit(0)
+    if update:
+        print("You have version %s, downloading version %s" %
+               (ref_version, lastest_version))
+
+    if lastest_version == "":
+        print("Errors while checking lastest version")
+        sys.exit(1)
+    ver_url = "%s/dist/dug_%s.py" % (__GITHUB_HOST__, lastest_version)
+    script_file = fn_get(ver_url)
+    if script_file == "":
+        print("Errors while getting lastest version")
+        sys.exit(1)
+
+    fout = open(dest_fname, "wb")
+    fout.write(script_file)
+    fout.close()
+    print("File version %s has been saved as %s" %
+         (lastest_version, dest_fname))
+    if not update:
+        print("Move it wherever you please")
+    sys.exit(0)
+
 
 SCAN_DIR = [
     os.path.expanduser("~/.local/share/applications"),
@@ -157,10 +233,10 @@ def scan_for_browsers():
     save_conf(CONF_FILE, ret)
 
 def update_program():
-    print("Nah, not now")
+    download_last(__version__, sys.argv[0], True)
 
 def check_for_updates():
-    print("Nah, not now")
+    check_version(__version__)
 
 def show_help():
     print("HELP")
