@@ -49,7 +49,7 @@ def request_http():
 
 def check_version(ref_version):
     fn_get = request_http()
-    lastest_url = "%s/dist/lastest"%__GITHUB_HOST__
+    lastest_url = "%s/dist/latest"%__GITHUB_HOST__
     lastest_version = fn_get(lastest_url).strip()
     print("Lastes version is %s" % lastest_version)
     print("You have version %s" % ref_version)
@@ -58,7 +58,7 @@ def check_version(ref_version):
 
 def download_last(ref_version, dest_fname, update):
     fn_get = request_http()
-    lastest_url = "%s/dist/lastest"%__GITHUB_HOST__
+    lastest_url = "%s/dist/latest"%__GITHUB_HOST__
     lastest_version = fn_get(lastest_url).strip()
 
     if update and lastest_version == ref_version:
