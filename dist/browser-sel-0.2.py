@@ -78,7 +78,7 @@ def download_last(ref_version, dest_fname, update):
         print("Errors while getting lastest version")
         sys.exit(1)
 
-    fout = open(dest_fname, "wb")
+    fout = open(dest_fname, "w")
     fout.write(script_file)
     fout.close()
     print("File version %s has been saved as %s" %
