@@ -10,6 +10,8 @@ import glob
 
 import sys, os
 
+__VERSION__ = ["0.1"]
+
 SCAN_DIR = [
     os.path.expanduser("~/.local/share/applications"),
     "/usr/share/applications"
@@ -37,8 +39,9 @@ def save_conf(filename, desktops):
 
 class DesktopFile(object):
 
-    def __init__(self, filename):
+    def __init__(self, filename, urls):
         self.filename = filename
+        self.urls = urls
         self.entry = DesktopEntry.DesktopEntry(filename)
         icon_name = self.entry.getIcon()
         self.icon_path = None
@@ -79,26 +82,47 @@ class DesktopFile(object):
             
         btn.set_property("tooltip-text", tooltip)
 
-        print (exec_cmd)
+        btn.exec_cmd = exec_cmd.replace("%u","%U").replace("%U", '"%s"') + " &"
         btn.connect("clicked", self.onClick)
         return btn
 
     def onClick(self, btn):
-        print("Click")
+        if len(self.urls) == 0:
+            os.system(btn.exec_cmd.replace('"%s"',""))
+        else:
+            for u in self.urls:
+                os.system(btn.exec_cmd%u)
+        Gtk.main_quit()
         
 def main(url_list):
     browsers = load_conf(CONF_FILE)
-    print(browsers)
+    if browsers == []:
+        print("""Browser list is empty.
+
+$ %s --scan
+
+to build (update) the list of the browsers.
+You can manually edit %s file to remove/add programs
+"""%(sys.argv[0], CONF_FILE))
+        sys.exit(0)
 
     win = Gtk.Window()
     win.connect("destroy", Gtk.main_quit)
     win.set_border_width(10)
     #win.set_type_hint(Gdk.WindowTypeHint.UTILITY)
-    accel = Gtk.AccelGroup()
-    win.add_accel_group(accel)
 
-    key, mod = Gtk.accelerator_parse("ESC")
-    win.add_accelerator("destroy",accel, key, mod, Gtk.AccelFlags.VISIBLE)
+    if len(url_list)==0:
+        win.set_title("Open")
+    elif len(url_list)==1:
+        win.set_title(url_list[0])
+    else:
+        win.set_title("Multiple urls")
+
+    # accel = Gtk.AccelGroup()
+    # win.add_accel_group(accel)
+    # 
+    # key, mod = Gtk.accelerator_parse("ESC")
+    # win.add_accelerator("destroy",accel, key, mod, Gtk.AccelFlags.VISIBLE)
 
     grid = Gtk.Grid()
     win.add(grid)
@@ -109,7 +133,7 @@ def main(url_list):
         if not os.path.exists(b):
             continue
 
-        entry = DesktopFile(b)
+        entry = DesktopFile(b, url_list)
         for b in entry.btn:
             grid.attach(b, column, row, 1, 1)
             column += 1
